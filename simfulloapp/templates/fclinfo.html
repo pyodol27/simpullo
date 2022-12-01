@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+    {% include 'base/head.html' %}
+    {% include 'base/navbar.html' %}
+
+
+<body>
+      FCL 페이지임
+      <input type="text" placeholder="origin" class="origin">
+      <input type="text" placeholder="dest" class="dest">
+      <input type="text" placeholder="line" class="line">
+      <input type="text" placeholder="name" class="name">
+
+      <select id="cur" class="cur">
+          <option value="USD">USD</option>
+          <option value="KRW">KRW</option>
+        </select>
+        <input type="text" placeholder="rate" class="rate" />
+        <select id="unit" class="unit">
+          <option value="20FT">20FT</option>
+          <option value="40FT">40FT</option>
+          <option value="BL">BL</option>
+        </select>
+        <select id="chargeat" class="chargeAt">
+          <option value="origin">origin</option>
+          <option value="freight">freight</option>
+          <option value="destination">destination</option>
+        </select>
+        <input type="date" placeholder="ttime" class="ttime" />
+        <input type="text" placeholder="vaildity" class="vaildity" />
+        <input type="text" placeholder="group" class="group" />
+        <button class="save">저장</button>
+
+    <table class="">
+        <thead>
+          <tr>
+            <td>Origin</td>
+            <td>Dest</td>
+            <td>Line</td>
+            <td>name</td>
+            <td>cur</td>
+            <td>rate</td>
+            <td>unit</td>
+            <td>chargeAt</td>
+            <td>T/Time</td>
+            <td>vaildity</td>
+            <td>group</td>
+            <td>Update/Delete</td>
+          </tr>
+        </thead>
+        <tbody class="tbody">
+          {% for i in info %}
+          <tr class="heng{{i.id}}">
+            <td><input type="text" value="{{i.origin}}" class="origin{{i.id}}" size="5" disabled /></td>
+            <td><input type="text" value="{{i.dest}}" class="dest{{i.id}}" size="5" disabled /></td>
+            <td><input type="text" value="{{i.line}}" class="line{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.name}}" class="name{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.cur}}" class="cur{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.unit}}" class="unit{{i.id}}" size="3" disabled />
+            <td><input type="date" value="{{i.chargeAt}}" class="chargeAt{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.ttime}}" class="ttime{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.vaildity}}" class="vaildity{{i.id}}" disabled /></td>
+            <td><input type="text" value="{{i.group}}" class="group{{i.id}}" disabled /></td>
+            <td>
+              <button id="{{i.id}}" class="editbtn{{i.id}}" onclick="editbtn(this.id)">수정</button>
+              <button style="display: none" id="{{i.id}}" class="updatebtn{{i.id}}" onclick="updatebtn(this.id)" data-bs-toggle="modal" data-bs-target="#updateModal{{i.id}}">저장</button>
+              <div class="modal fade" id="updateModal{{i.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">변경사항이 저장되었습니다.</div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <button id="{{i.id}}" class="deletebtn{{i.id}}" type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#deleteModal{{i.id}}">
+                삭제
+              </button>
+              <div class="modal fade" id="deleteModal{{i.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">정말 삭제하시겠습니까?</div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="{{i.id}}"class="btn btn-danger" onclick="deleterate(this.id)" data-bs-dismiss="modal">삭제하기</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <button style="display: none" id="{{i.id}}" class="cancelbtn{{i.id}}" onclick="cancel(this.id)">취소</button>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+  
+      {% include 'base/footer.html' %}
+      <script>
+        $(".save").on("click", function () {
+            var origin = $(".origin").val();
+            var dest = $(".dest").val();
+            var line = $(".dest").val();
+            var name = $(".name").val();
+            var cur = $(".cur").val();
+            var rate = $(".rate").val();
+            var unit = $(".unit").val();
+            var chargeAt = $(".chargeAt").val();
+            var ttime = $(".ttime").val();
+            var vaildity = $(".vaildity").val();
+            var group = $(".group").val();
+    
+            param = {
+                origin : origin,
+                dest : dest,
+                name:name,
+                cur :cur,
+                rate:rate,
+                unit :unit,
+                chargeAt :chargeAt,
+                vaildity:vaildity,
+                group:group,
+            };
+    
+            $.ajax({
+              type: "POST",
+              url: "{% url 'fcladd' %}",
+              data: JSON.stringify(param),
+              success: function (data) {
+                console.log('저장성공');
+              },
+            });
+          });
+
+
+      function editbtn(id) {
+        $(".updatebtn" + id).css("display", "");
+        $(".cancelbtn" + id).css("display", "");
+        $(".deletebtn" + id).css("display", "none");
+        $(".editbtn" + id).css("display", "none");
+        $(".origin" + id).removeAttr("disabled");
+        $(".dest" + id).removeAttr("disabled");
+        $(".line" + id).removeAttr("disabled");
+        $(".name" + id).removeAttr("disabled");
+        $(".cur" + id).removeAttr("disabled");
+        $(".rate" + id).removeAttr("disabled");
+        $(".unit" + id).removeAttr("disabled");
+        $(".chargeAt" + id).removeAttr("disabled");
+        $(".ttime" + id).removeAttr("disabled");
+        $(".vaildity" + id).removeAttr("disabled");
+        $(".group" + id).removeAttr("disabled");
+        $(".heng"+id).css("background-color","green")
+      }
+      function updatebtn(id) {
+        var origin = $(".origin"+ id).val();
+        var dest = $(".dest"+ id).val();
+        var line = $(".line"+ id).val();
+        var name = $(".name"+ id).val();
+        var cur = $(".cur"+ id).val();
+        var rate = $(".rate"+ id).val();
+        var unit = $(".unit"+ id).val();
+        var chargeAt = $(".chargeAt"+ id).val();
+        var ttime = $(".ttime"+ id).val();
+        var vaildity = $(".vaildity"+ id).val();
+        var group = $(".group"+ id).val();
+
+        param = {
+            id: id,
+            origin : origin,
+            dest : dest,
+            name:name,
+            cur :cur,
+            rate:rate,
+            unit :unit,
+            chargeAt :chargeAt,
+            vaildity:vaildity,
+            group:group,
+        }
+
+        $.ajax({
+          type: "POST",
+          url: "{% url 'fclupdate' %}",
+          data: JSON.stringify(param),
+          success: function () {
+            $(".updatebtn" + id).css("display", "none");
+            $(".cancelbtn" + id).css("display", "none");
+            $(".deletebtn" + id).css("display", "");
+            $(".editbtn" + id).css("display", "");
+            $(".origin" + id).attr("disabled", true);
+            $(".dest" + id).attr("disabled", true);
+            $(".line" + id).attr("disabled", true);
+            $(".name" + id).attr("disabled", true);
+            $(".cur" + id).attr("disabled", true);
+            $(".rate" + id).attr("disabled", true);
+            $(".unit" + id).attr("disabled", true);
+            $(".chargeAt" + id).attr("disabled", true);
+            $(".ttime" + id).attr("disabled", true);
+            $(".vaildity" + id).attr("disabled", true);
+            $(".group" + id).attr("disabled", true);
+            $(".heng"+id).css("background-color","");
+            console.log('수정성공');
+          },
+        });
+      }
+      function deleterate(id) {
+        param = {
+          id: id,
+        };
+
+        $.ajax({
+          type: "POST",
+          url: "{% url 'fcldelete' %}",
+          data: JSON.stringify(param),
+          success: function () {
+            $(".heng" + id).remove();
+            console.log('삭제성공')
+          },
+        });
+      }
+      function cancel(id) {
+        $(".updatebtn" + id).css("display", "none");
+        $(".cancelbtn" + id).css("display", "none");
+        $(".deletebtn" + id).css("display", "");
+        $(".editbtn" + id).css("display", "");
+        $(".origin" + id).attr("disabled", true);
+        $(".dest" + id).attr("disabled", true);
+        $(".line" + id).attr("disabled", true);
+        $(".name" + id).attr("disabled", true);
+        $(".cur" + id).attr("disabled", true);
+        $(".rate" + id).attr("disabled", true);
+        $(".unit" + id).attr("disabled", true);
+        $(".chargeAt" + id).attr("disabled", true);
+        $(".ttime" + id).attr("disabled", true);
+        $(".vaildity" + id).attr("disabled", true);
+        $(".group" + id).attr("disabled", true);
+        $(".heng"+id).css("background-color","");
+      }
+
+
+    </script>
+
+
+
+</body>
+
