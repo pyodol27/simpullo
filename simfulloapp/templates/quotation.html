@@ -24,8 +24,12 @@
     <input type="text" placeholder="kg" class="kg">
 
     <button onclick="showQuotation()">견적보기</button>
-    <div><p id="lclquote"></p>
+    <div><p id="lcltotal"></p>
+         <p id="airtotal" ></p>
+         <p id="fcltotal" ></p>
+        
     </div>
+   
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
@@ -56,8 +60,13 @@
                 data: JSON.stringify(param),
                 success: function (data) {
                     var lcltotal = data['lcltotal']
-                    $('#lclquote').html('lcl 견적 금액 :' + lcltotal+'원')
+                    $('#lcltotal').html('lcl 견적 금액 :' + lcltotal+'원')
+                    
+                    var airtotal = data['airtotal']
+                    $('#airtotal').html('air 견적 금액 :' + airtotal+'원')
 
+                    var fcltotal = data['fcltotal']
+                    $('#fcltotal').html('fcl 견적 금액 :' + fcltotal+'원')
 
                 },
               });

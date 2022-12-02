@@ -51,15 +51,9 @@ def showquote(request):
     elif incoterms == 'CFR':
         q.add(Q(chargeAt = 'freight')|Q(chargeAt = 'origin'), q.AND)
         #rate = lcl.objects.filter(q)
-        
+    
     rate = lcl.objects.filter(q)
-    
-    print(rate[0].cur) #첫번재 놈의 통화s
-    print(rate[0].rate)
-    print(rate[0].unit)
-    
-    #lcl.object에있는 데이터 중 origin과 dest값이 같은 xxxxxx
-    #ver2 콘솔사별로 뽑고, 비교, 
+    #print(rate[0].cur) #첫번재 놈의 통화
     lcltotal = 0
     for i in range(0, len(rate)):
         if rate[i].cur == 'USD':
@@ -77,11 +71,181 @@ def showquote(request):
             elif rate[i].unit == 'KG':
                 total = float(rate[i].rate) * float(kg)
                 
-        lcltotal = lcltotal + total
-        
-    print(lcltotal)
+        lcltotal = lcltotal + total  
     
-    context = {'lcltotal' : lcltotal}
+    
+    fclrate = fcl.objects.filter(q)
+    twototal = 0
+    for i in range(0, len(fclrate)):
+        if fclrate[i].cur == 'USD':
+            if fclrate[i].unit == '20FT':
+                total = float(fclrate[i].rate)* 1400
+            elif fclrate[i].unit == 'BL':
+                total = float(fclrate[i].rate)* 1400
+        else:
+            if fclrate[i].unit == '20FT':
+                total = float(fclrate[i].rate)
+            elif fclrate[i].unit == 'BL':
+                total = float(fclrate[i].rate)
+        
+        twototal = twototal + total
+    print(twototal)
+  #  
+  #  fototal=0
+  #  for a in range(0, len(fclrate)):
+  #      if fclrate[a].cur == 'USD':
+  #          if fclrate[a].unit == '40FT':
+  #              total = float(fclrate[a].rate)* 1400
+  #          elif fclrate[a].unit == 'BL':
+  #              total = float(fclrate[a].rate)* 1400
+  #      else:
+  #          if fclrate[a].unit == '40FT':
+  #              total = float(fclrate[a].rate)
+  #          elif fclrate[a].unit == 'BL':
+  #              total = float(fclrate[a].rate)
+  #      
+  #      fototal = fototal + total
+  #  print(fototal)
+
+    #print(lcltotal)
+    if float(cbm) * 167 > float(kg) :
+        cw =  float(cbm)*167
+    else :
+        cw = float(kg)
+    
+    ao = airother.objects.filter(origin = origin, dest = dest)
+    #print(ao[0].cur)
+    othertotal = 0
+    
+    for a in range(0, len(ao)):
+        if ao[a].cur == 'USD':
+            if ao[a].unit == 'BL':
+                total = float(ao[a].rate) * 1400
+            elif ao[a].unit == 'KG':
+                total = float(ao[a].rate) * 1400  * float(cw)
+        else:
+            if ao[a].unit == 'BL':
+                total = float(ao[a].rate)
+            elif ao[a].unit == 'KG':
+                total = float(ao[a].rate) * float(cw)
+    
+        othertotal = othertotal + total
+    
+        
+        
+    
+    afc = air.objects.filter(origin = origin, dest = dest)
+    
+    afclist =[]
+    for i in range(0, len(afc)):
+        if afc[i].cur == 'USD':
+            if cw < 45 : #nomal
+                if cw*(float(afc[i].normal)+float(afc[i].fsc))*1400 < float(afc[i].minimum)*1400 :
+                    afclist.append(float(afc[i].minimum)*1400)  
+                else:
+                    if cw*(float(afc[i].normal)+float(afc[i].fsc))*1400 > 45*(float(afc[i].over45)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over45)*1400*45)
+                    else :
+                        afclist.append(cw*(float(afc[i].normal)+float(afc[i].fsc))*1400)
+                        
+            elif cw < 100 : #+45
+                if cw*(float(afc[i].over45)+float(afc[i].fsc))*1400 < float(afc[i].minimum)*1400 :
+                    afclist.append(float(afc[i].minimum)*1400)
+                else :
+                    if cw*(float(afc[i].over45)+float(afc[i].fsc))*1400 > 100*(float(afc[i].over100)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over100)*1400*100)
+                    else:
+                        afclist.append(cw*(float(afc[i].over45)+float(afc[i].fsc))*1400)
+                
+            elif cw < 300 : #+100
+                if cw*(float(afc[i].over100)+float(afc[i].fsc))*1400 < float(afc[i].minimum)*1400 :
+                    afclist.append(float(afc[i].minimum)*1400)
+                else :
+                    if cw*(float(afc[i].over100)+float(afc[i].fsc))*1400 > 300*(float(afc[i].over300)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over300)*1400*300)
+                    else:
+                        afclist.append(cw*(float(afc[i].over100)+float(afc[i].fsc))*1400)
+                
+            elif cw < 500 :
+                if cw*(float(afc[i].over300)+float(afc[i].fsc))*1400 < float(afc[i].minimum)*1400 :
+                    afclist.append(float(afc[i].minimum)*1400)
+                else :
+                    if cw*(float(afc[i].over300)+float(afc[i].fsc))*1400 > 500*(float(afc[i].over500)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over500)*1400*500)
+                    else:
+                        afclist.append(cw*(float(afc[i].over300)+float(afc[i].fsc))*1400)
+                
+            elif cw < 1000 :
+                if cw*(float(afc[i].over500)+float(afc[i].fsc))*1400 < float(afc[i].minimum)*1400 :
+                    afclist.append(float(afc[i].minimum)*1400)
+                else :
+                    if cw*(float(afc[i].over500)+float(afc[i].fsc))*1400 > 1000*(float(afc[i].over1000)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over1000+float(afc[i].fsc))*1400*1000)
+                    else:
+                        afclist.append(cw*(float(afc[i].over500)+float(afc[i].fsc))*1400)
+                
+            elif cw > 1000 :
+                if cw*(float(afc[i].over1000)+float(afc[i].fsc))*1400 > float(afc[i].minimum)*1400 :
+                    afclist.append(cw*(float(afc[i].over1000) + float(afc[i].fsc))*1400)
+                else :
+                    afclist.append(float(afc[i].minimum)*1400)
+            
+        elif afc[i].cur == 'KRW':
+            if cw < 45 :
+                if cw*(float(afc[i].normal)+float(afc[i].fsc)) < float(afc[i].minimum) :
+                        afclist.append(float(afc[i].minimum))  
+                else:
+                    if cw*(float(afc[i].normal)+float(afc[i].fsc)) > 45*(float(afc[i].over45)+float(afc[i].fsc)) :
+                        afclist.append(float(afc[i].over45)*45)
+                    else :
+                        afclist.append(cw*(float(afc[i].normal)+float(afc[i].fsc)))
+                    
+            elif cw < 100 :
+                if cw*(float(afc[i].over45)+float(afc[i].fsc)) < float(afc[i].minimum) :
+                    afclist.append(float(afc[i].minimum))
+                else :
+                    if cw*(float(afc[i].over45)+float(afc[i].fsc)) > 100*(float(afc[i].over100)+float(afc[i].fsc))*1400 :
+                        afclist.append(float(afc[i].over100)*100)
+                    else:
+                        afclist.append(cw*(float(afc[i].over45)+float(afc[i].fsc)))
+            
+            elif cw < 300 :
+                if cw*(float(afc[i].over100)+float(afc[i].fsc)) < float(afc[i].minimum) :
+                    afclist.append(float(afc[i].minimum))
+                else :
+                    if cw*(float(afc[i].over100)+float(afc[i].fsc)) > 300*(float(afc[i].over300)+float(afc[i].fsc)) :
+                        afclist.append(float(afc[i].over300)*300)
+                    else:
+                        afclist.append(cw*(float(afc[i].over100)+float(afc[i].fsc)))
+
+            elif cw < 500 :
+                if cw*(float(afc[i].over300)+float(afc[i].fsc)) < float(afc[i].minimum) :
+                    afclist.append(float(afc[i].minimum))
+                else :
+                    if cw*(float(afc[i].over300)+float(afc[i].fsc)) > 500*(float(afc[i].over500)+float(afc[i].fsc)) :
+                        afclist.append(float(afc[i].over500)*500)
+                    else:
+                        afclist.append(cw*(float(afc[i].over300)+float(afc[i].fsc)))
+                    
+            elif cw < 1000 :
+                if cw*(float(afc[i].over500)+float(afc[i].fsc)) < float(afc[i].minimum) :
+                    afclist.append(float(afc[i].minimum))
+                else :
+                    if cw*(float(afc[i].over500)+float(afc[i].fsc)) > 1000*(float(afc[i].over1000)+float(afc[i].fsc)) :
+                        afclist.append(float(afc[i].over1000+float(afc[i].fsc))*1000)
+                    else:
+                        afclist.append(cw*(float(afc[i].over500)+float(afc[i].fsc)))
+  
+            elif cw > 1000 :
+                if cw*(float(afc[i].over1000)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over1000) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+            
+    airtotal = othertotal + min(afclist)
+   
+        
+    context = {'lcltotal' : lcltotal, 'airtotal' : airtotal, 'twototal' : twototal}
 
 
     return JsonResponse(context)

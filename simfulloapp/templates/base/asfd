@@ -13,3 +13,43 @@
                 var fsc= $(".fsc").val();
                 var skdl= $(".skdl").val();
                 var via= $(".via").val();
+
+
+                elif afc[i].cur == 'KRW':
+            if cw < 45 :
+                if cw*(float(afc[i].normal)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].normal) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+                    
+            elif cw < 100 :
+                if cw*(float(afc[i].over45)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over45) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+            
+            elif cw < 300 :
+                if cw*(float(afc[i].over100)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over100) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+
+            elif cw < 500 :
+                if cw*(float(afc[i].over300)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over300) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+                    
+            elif cw < 1000 :
+                if cw*(float(afc[i].over500)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over500) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+  
+            else:
+                if cw*(float(afc[i].over1000)+float(afc[i].fsc)) > float(afc[i].minimum) :
+                    afclist.append(cw*(float(afc[i].over1000) + float(afc[i].fsc)))
+                else :
+                    afclist.append(float(afc[i].minimum))
+                    
+    print(afclist)
